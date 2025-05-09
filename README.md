@@ -1,73 +1,79 @@
-# Welcome to your Lovable project
+# BaseSplit
 
-## Project info
+**BaseSplit** is a decentralized expense-sharing application built on the **Base Chain**, inspired by Splitwise. It integrates AI-powered budget analysis and provides detailed reports of your spending patterns. Built for the **Base Batch India Hackathon**, BaseSplit empowers users to track, manage, and understand their finances collaboratively and intelligently.
 
-**URL**: https://lovable.dev/projects/4cea378a-98ea-4fb8-9679-0ad330cede8d
+---
 
-## How can I edit this code?
+## Overview
 
-There are several ways of editing your application.
+BaseSplit brings the ease of shared expense tracking to the blockchain. Designed with transparency and automation at its core, it combines smart contracts, real-time analytics, and artificial intelligence to offer a modern solution for personal and group financial management.
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/4cea378a-98ea-4fb8-9679-0ad330cede8d) and start prompting.
+## Key Features
 
-Changes made via Lovable will be committed automatically to this repo.
+- Split and manage expenses within groups or among friends
+- Transparent and immutable transactions on Base Chain
+- AI-powered analysis of your budget and categorization of spending
+- Comprehensive and visual reports for income, expenses, and category breakdowns
+- Firebase-backed data storage for seamless and secure user experience
+- Intuitive, clean, and responsive user interface built with React
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Problems We Solved
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. **Lack of Trust in Expense Records**  
+   → Transactions are recorded on Base Chain, ensuring tamper-proof and verifiable expense history
 
-Follow these steps:
+2. **Manual Budget Categorization is Time-Consuming**  
+   → Our AI model categorizes expenses automatically and generates personalized financial summaries
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+3. **Limited Insights in Traditional Split Applications**  
+   → BaseSplit visualizes your spending habits and provides smart financial recommendations
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+4. **Fragmented Tools for Expense Splitting and Budgeting**  
+   → We combine both into a single, easy-to-use decentralized application
 
-# Step 3: Install the necessary dependencies.
-npm i
+---
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+## Tech Stack
 
-**Edit a file directly in GitHub**
+- **Frontend**: React.js, Tailwind CSS  
+- **Blockchain**: Base Chain (EVM-compatible), Smart Contracts (Solidity)  
+- **AI Layer**: OpenAI API for budget analysis and classification  
+- **Storage**: Firebase (Authentication, Firestore, and Hosting)  
+- **Libraries**: Ethers.js, Chart.js, Zustand, Axios
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## Architecture
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+The project is organized into multiple layers:
 
-## What technologies are used for this project?
+- **User Interface (React)**: For wallet connection, group creation, and spending overview
+- **Smart Contract Layer (Base Chain)**: For secure and transparent expense management
+- **AI Engine (OpenAI)**: To process transactions and generate categorized budget insights
+- **Storage (Firebase)**: To manage user authentication, store group metadata, and sync expenses
 
-This project is built with:
+---
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Future Scope
 
-## How can I deploy this project?
+- Mobile version using React Native
+- Real-time expense notifications and smart alerts
+- AI-generated savings plans and personalized financial coaching
+- Recurring payments and subscription tracking
+- Multi-chain compatibility and gasless transactions
 
-Simply open [Lovable](https://lovable.dev/projects/4cea378a-98ea-4fb8-9679-0ad330cede8d) and click on Share -> Publish.
+---
 
-## Can I connect a custom domain to my Lovable project?
+## Contribution
 
-Yes, you can!
+This project was developed as part of the **Base Batch India Hackathon**. We welcome feedback, ideas, and contributions. Please feel free to open issues or pull requests for collaboration.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## License
+
+This project is licensed under the MIT License.
