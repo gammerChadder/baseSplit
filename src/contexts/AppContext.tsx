@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { createUserProfile, getUserProfile, updateUserProfile, ensureAuthenticated, getUserTransactions } from "@/lib/firebase";
+import { createUserProfile, getUserProfile, updateUserProfile, ensureAuthenticated, getUserTransactions,updateTransactionStatus } from "@/lib/firebase";
 import { connectWallet } from "@/lib/web3";
 import { displayToast } from "@/lib/utils";
 import { User, Transaction } from "@/types";
@@ -14,6 +14,7 @@ interface AppContextType {
   disconnectUser: () => void;
   updateUser: (data: Partial<User>) => Promise<void>;
   refreshTransactions: () => Promise<void>;
+  handlePaymentComplete: (transactionId: string, settlementData: any) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType>({
@@ -26,6 +27,7 @@ const AppContext = createContext<AppContextType>({
   disconnectUser: () => {},
   updateUser: async () => {},
   refreshTransactions: async () => {},
+  handlePaymentComplete: async () => {},
 });
 
 export const useApp = () => useContext(AppContext);
@@ -92,6 +94,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [user]);
 
+
+  const handlePaymentComplete = async (transactionId, settlementData) => {
+  try {
+    setIsLoading(true);
+    
+    // Update transaction status
+    await updateTransactionStatus(transactionId, user.id, settlementData);
+    
+    // Refresh transactions to get the updated data
+    await refreshTransactions();
+    
+    displayToast("Payment Complete", "Your payment has been recorded successfully!", "success");
+  } catch (error) {
+    console.error("Error completing payment:", error);
+    displayToast("Payment Error", "Failed to record your payment", "error");
+  } finally {
+    setIsLoading(false);
+  }
+};
   const connectUser = async () => {
     try {
       setIsLoading(true);
@@ -179,6 +200,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         connectUser,
         disconnectUser,
         updateUser,
+        handlePaymentComplete,
         refreshTransactions,
       }}
     >
