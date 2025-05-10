@@ -1,4 +1,4 @@
-
+// groupDetail.tsx
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useApp } from "@/contexts/AppContext";
@@ -29,7 +29,7 @@ import { Group, User, Expense } from "@/types";
 
 export default function GroupDetail() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useApp();
+  const { user, transactions } = useApp();
   const navigate = useNavigate();
   
   const [isLoading, setIsLoading] = useState(true);
@@ -123,23 +123,36 @@ export default function GroupDetail() {
           
           // Setup expenses with full details
           const enhancedExpenses = (groupData.expenses || []).map((expense: any) => {
-            const paidByUser = memberDetails.find((member) => member.id === expense.paidBy);
-            
-            const splitBetween = expense.splitBetween.map((split: any) => {
-              const splitUser = memberDetails.find((member) => member.id === split.userId);
-              return {
-                ...split,
-                userName: splitUser?.displayName || "Unknown",
-              };
-            });
-            
-            return {
-              ...expense,
-              date: expense.date?.toDate() || new Date(),
-              paidByName: paidByUser?.displayName || "Unknown",
-              splitBetween,
-            };
-          });
+  const paidByUser = memberDetails.find((member) => member.id === expense.paidBy);
+  
+  // Find matching transaction to check settlement status
+  const matchingTransaction = transactions.find(t => 
+    t.expenseId === expense.id || 
+    (t.description === expense.description && t.amount === expense.amount)
+  );
+  
+  // Check if current user has paid this expense
+  const isPaidByCurrentUser = matchingTransaction?.settlements?.some(
+    settlement => settlement.payerId === user.id && settlement.status === "completed"
+  ) || false;
+  
+  const splitBetween = expense.splitBetween.map((split: any) => {
+    const splitUser = memberDetails.find((member) => member.id === split.userId);
+    return {
+      ...split,
+      userName: splitUser?.displayName || "Unknown",
+      isPaid: split.userId === user.id ? isPaidByCurrentUser : false
+    };
+  });
+  
+  return {
+    ...expense,
+    date: expense.date?.toDate() || new Date(),
+    paidByName: paidByUser?.displayName || "Unknown",
+    splitBetween,
+    isPaidByCurrentUser
+  };
+});
           
           setExpenses(enhancedExpenses);
           
@@ -436,10 +449,13 @@ export default function GroupDetail() {
                   .map((expense) => (
                     <ExpenseCard
                       key={expense.id}
-                      expense={expense}
-                      currentUserId={user.id}
-                      onClick={() => handleShowExpenseDetails(expense)}
-                    />
+                      expense={{
+                      ...expense,
+                      settlements: transactions.find(t => t.expenseId === expense.id)?.settlements
+                    }}
+                    currentUserId={user.id}
+                    onClick={() => handleShowExpenseDetails(expense)}
+                  />
                   ))}
               </div>
             ) : (
