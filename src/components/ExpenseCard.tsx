@@ -83,7 +83,7 @@ export function ExpenseCard({ expense, currentUserId, onClick }: ExpenseCardProp
   const hasAlreadyPaid = currentUserId && updatedExpense.settlements?.some(
     settlement => 
       settlement.payerId === currentUserId && 
-      settlement.status === "completed"
+      settlement.status === "completed" // Make sure to check for "completed" status
   );
   
   // Calculate what the current user owes or is owed
