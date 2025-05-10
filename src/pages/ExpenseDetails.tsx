@@ -17,7 +17,7 @@ import { AllowedCurrency } from "@/types";
 export default function ExpenseDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, refreshTransactions } = useApp();
+  const { user, refreshTransactions, handlePaymentComplete } = useApp();
   const [expense, setExpense] = useState<Transaction | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [paymentStatus, setPaymentStatus] = useState("idle"); // idle, loading, success, error
@@ -216,18 +216,12 @@ export default function ExpenseDetails() {
         currency: validCurrency,
         expenseId: expense.id,
         transactionHash: tx.hash,
-        status: "pending"
+        status: "completed" // Changed from "pending" to "completed"
       };
 
-      // Record settlement in Firebase
-      await recordSettlement(settlementData);
-
-      // Update the transaction status for this user in the transactions collection
-      await updateTransactionStatus(expense.id, user.id, settlementData);
+      // Use the handlePaymentComplete function from context instead of direct Firebase calls
+      await handlePaymentComplete(expense.id, settlementData);
       
-      // Refresh transactions in the app context to update UI across components
-      await refreshTransactions();
-
       // Update local state to reflect the payment
       setExpense(prev => {
         if (!prev) return null;
