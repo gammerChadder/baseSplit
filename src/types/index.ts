@@ -10,6 +10,7 @@ export interface User {
   defaultCurrency: AllowedCurrency;
   groups?: Array<{ groupId: string; role: string }>;
   balance?: string;
+  usdcBalance?: string;
 }
 
 export interface Group {
@@ -54,6 +55,7 @@ export interface Settlement {
   transactionHash?: string;
   status: "pending" | "completed";
   createdAt?: any;
+  paymentMethod?: "eth" | "usdc";
 }
 
 // Update your Transaction interface to include settlements

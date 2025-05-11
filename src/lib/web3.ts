@@ -1,10 +1,26 @@
-
 import { ethers } from "ethers";
 import { displayToast } from "./utils";
 
 export const SEPOLIA_CHAIN_ID = '0x14a34'; // Hex value for base Sepolia testnet (84532 in decimal)
 export const SEPOLIA_RPC_URL = 'https://84532.rpc.thirdweb.com';
 export const BLOCK_EXPLORER_URL = 'https://base-sepolia.blockscout.com';
+
+// USDC contract address on Base Sepolia testnet
+export const USDC_CONTRACT_ADDRESS = '0x036CbD53842c5426634e7929541eC2318f3dCF7e'; // Example address, replace with actual testnet USDC address
+export const USDC_CONTRACT_ABI = [
+  // ERC20 Standard functions
+  "function name() view returns (string)",
+  "function symbol() view returns (string)",
+  "function decimals() view returns (uint8)",
+  "function balanceOf(address owner) view returns (uint256)",
+  "function transfer(address to, uint256 amount) returns (bool)",
+  "function allowance(address owner, address spender) view returns (uint256)",
+  "function approve(address spender, uint256 amount) returns (bool)",
+  "function transferFrom(address from, address to, uint256 amount) returns (bool)",
+  // Events
+  "event Transfer(address indexed from, address indexed to, uint256 value)",
+  "event Approval(address indexed owner, address indexed spender, uint256 value)"
+];
 
 export async function requestAccount() {
   try {
@@ -85,6 +101,29 @@ export async function getBalance(address: string) {
   }
 }
 
+export async function getUsdcBalance(address: string) {
+  try {
+    if (!window.ethereum) {
+      throw new Error("MetaMask is not installed!");
+    }
+    
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const usdcContract = new ethers.Contract(
+      USDC_CONTRACT_ADDRESS,
+      USDC_CONTRACT_ABI,
+      provider
+    );
+    
+    const decimals = await usdcContract.decimals();
+    const balance = await usdcContract.balanceOf(address);
+    
+    return ethers.utils.formatUnits(balance, decimals);
+  } catch (error) {
+    console.error("Error getting USDC balance:", error);
+    throw error;
+  }
+}
+
 export async function sendTransaction(to: string, amount: string) {
   try {
     if (!window.ethereum) {
@@ -120,25 +159,73 @@ export async function sendTransaction(to: string, amount: string) {
   }
 }
 
-export async function connectWallet() {
+export async function sendUsdcTransaction(to: string, amount: string) {
   try {
     if (!window.ethereum) {
-      displayToast("Wallet Connection Failed", "Please install MetaMask to use this application.", "error");
       throw new Error("MetaMask is not installed!");
     }
     
+    // Ensure on the correct network
     await switchToSepoliaNetwork();
-    const address = await requestAccount();
     
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const balance = await getBalance(address);
+    const signer = provider.getSigner();
     
-    return { address, balance };
+    // Get USDC contract
+    const usdcContract = new ethers.Contract(
+      USDC_CONTRACT_ADDRESS,
+      USDC_CONTRACT_ABI,
+      signer
+    );
+    
+    // Get decimals
+    const decimals = await usdcContract.decimals();
+    
+    // Convert amount to USDC units
+    const amountInUsdcUnits = ethers.utils.parseUnits(amount, decimals);
+    
+    // Send USDC transaction
+    displayToast("USDC Transaction", "Waiting for confirmation...", "info");
+    const transaction = await usdcContract.transfer(to, amountInUsdcUnits);
+    
+    // Wait for transaction to be mined
+    const receipt = await transaction.wait();
+    
+    return receipt.transactionHash;
   } catch (error) {
-    console.error("Error connecting wallet:", error);
-    displayToast("Wallet Connection Failed", "Please check your MetaMask extension and try again.", "error");
+    console.error("Error sending USDC transaction:", error);
     throw error;
   }
+}
+
+// This function is now a wrapper around OnchainKit's wallet connection
+export async function connectWallet() {
+  console.warn("connectWallet is deprecated. Use OnchainKit's wallet connection instead.");
+  
+  // If we have a wallet address in localStorage, return it
+  const savedAddress = localStorage.getItem("walletAddress");
+  if (savedAddress) {
+    try {
+      // Try to get the balance
+      const balance = await getBalance(savedAddress);
+      const usdcBalance = await getUsdcBalance(savedAddress);
+      
+      return { 
+        address: savedAddress, 
+        balance, 
+        usdcBalance 
+      };
+    } catch (error) {
+      console.error("Error getting wallet balance:", error);
+    }
+  }
+  
+  // Return empty values if no wallet is connected
+  return { 
+    address: "", 
+    balance: "0", 
+    usdcBalance: "0" 
+  };
 }
 
 export async function getGasPrice() {

@@ -163,17 +163,32 @@ export const updateTransactionStatus = async (transactionId, userId, settlementD
         // Update existing settlement
         settlements[existingSettlementIndex] = {
           ...settlements[existingSettlementIndex],
-          ...settlementData
+          ...settlementData,
+          status: "completed" // Ensure status is set to completed
         };
       } else {
         // Add new settlement
-        settlements.push(settlementData);
+        settlements.push({
+          ...settlementData,
+          payerId: userId,
+          status: "completed"
+        });
       }
       
       // Update the transaction with the new settlements array
       await updateDoc(transactionRef, {
         settlements,
         lastUpdatedAt: serverTimestamp()
+      });
+      
+      // Also record this settlement in the settlements collection
+      await recordSettlement({
+        transactionId,
+        payerId: userId,
+        receiverId: transactionData.paidBy,
+        amount: settlementData.amount,
+        currency: settlementData.currency,
+        transactionHash: settlementData.transactionHash || null
       });
       
       return true;

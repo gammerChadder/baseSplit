@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getUserTransactions, getUserProfile, recordSettlement, getGroup, updateTransactionStatus } from "@/lib/firebase";
 import { useApp } from "@/contexts/AppContext";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,13 +18,14 @@ import { AllowedCurrency } from "@/types";
 export default function ExpenseDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, refreshTransactions } = useApp();
+  const { user, refreshTransactions, handlePaymentComplete, handleUsdcPayment: makeUsdcPayment } = useApp();
   const [expense, setExpense] = useState<Transaction | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [paymentStatus, setPaymentStatus] = useState("idle"); // idle, loading, success, error
   const [txHash, setTxHash] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isPaid, setIsPaid] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"eth" | "usdc">("eth");
 
   useEffect(() => {
     if (!user || !id) {
@@ -40,7 +42,7 @@ export default function ExpenseDetails() {
           navigate("/expenses");
           return;
         }
-    
+
         // Check if the expense is already settled for this user
         if (foundExpense.settlements && Array.isArray(foundExpense.settlements)) {
           const userSettlement = foundExpense.settlements.find(s => s.payerId === user.id);
@@ -134,6 +136,15 @@ export default function ExpenseDetails() {
     return convertCurrency(amount, validCurrency, "ETH");
   };
 
+  // Convert currency to USDC (1:1 with USD)
+  const convertToUSDC = (amount: number, currency: string) => {
+    // Make sure we're using one of the allowed currency types
+    const validCurrency = (currency === "USD" || currency === "INR" || currency === "GBP" || 
+                          currency === "EUR" || currency === "ETH") ? currency : "USD";
+    // Convert to USD first (USDC is pegged to USD)
+    return convertCurrency(amount, validCurrency, "USD");
+  };
+
   // Helper function to get payer name
   const getPayerName = () => {
     if (!expense) return "Unknown";
@@ -160,7 +171,7 @@ export default function ExpenseDetails() {
     return expense?.category || "Food & Drinks";
   };
 
-  const handlePayment = async () => {
+  const handleEthPayment = async () => {
     if (!window.ethereum) {
       setErrorMessage("MetaMask is not installed. Please install MetaMask to make payments.");
       setPaymentStatus("error");
@@ -216,18 +227,13 @@ export default function ExpenseDetails() {
         currency: validCurrency,
         expenseId: expense.id,
         transactionHash: tx.hash,
-        status: "pending"
+        status: "completed",
+        paymentMethod: "eth"
       };
 
-      // Record settlement in Firebase
-      await recordSettlement(settlementData);
-
-      // Update the transaction status for this user in the transactions collection
-      await updateTransactionStatus(expense.id, user.id, settlementData);
+      // Use the handlePaymentComplete function from context instead of direct Firebase calls
+      await handlePaymentComplete(expense.id, settlementData);
       
-      // Refresh transactions in the app context to update UI across components
-      await refreshTransactions();
-
       // Update local state to reflect the payment
       setExpense(prev => {
         if (!prev) return null;
@@ -243,6 +249,84 @@ export default function ExpenseDetails() {
       console.error("Payment error:", error);
       setErrorMessage(error.message || "Payment failed. Please try again.");
       setPaymentStatus("error");
+    }
+  };
+
+  const processUsdcPayment = async () => {
+    if (!window.ethereum) {
+      setErrorMessage("MetaMask is not installed. Please install MetaMask to make payments.");
+      setPaymentStatus("error");
+      return;
+    }
+
+    try {
+      setPaymentStatus("loading");
+      setErrorMessage("");
+
+      // Get recipient wallet address
+      const recipientProfile = await getUserProfile(userDebt.to.id);
+      
+      let recipientWalletAddress;
+      if (recipientProfile && recipientProfile.walletAddress) {
+        recipientWalletAddress = recipientProfile.walletAddress;
+      } else if (userDebt.to.id.startsWith("0x")) {
+        recipientWalletAddress = userDebt.to.id;
+      } else {
+        throw new Error("Recipient wallet address not found");
+      }
+
+      // Convert amount to USDC
+      const currency = expense.currency || "USD";
+      const validCurrency = (currency === "USD" || currency === "INR" || currency === "GBP" || 
+                            currency === "EUR" || currency === "ETH") ? currency : "USD";
+      
+      const usdcAmount = convertToUSDC(userDebt.amount, validCurrency);
+      
+      // Use the makeUsdcPayment function from context
+      const txHash = await makeUsdcPayment(recipientWalletAddress, usdcAmount.toFixed(6));
+      
+      setTxHash(txHash);
+      setPaymentStatus("success");
+      setIsPaid(true);
+
+      // Create settlement data
+      const settlementData: Settlement = {
+        payerId: user.id,
+        receiverId: userDebt.to.id,
+        amount: userDebt.amount,
+        currency: validCurrency,
+        expenseId: expense.id,
+        transactionHash: txHash,
+        status: "completed",
+        paymentMethod: "usdc"
+      };
+
+      // Use the handlePaymentComplete function from context
+      await handlePaymentComplete(expense.id, settlementData);
+      
+      // Update local state to reflect the payment
+      setExpense(prev => {
+        if (!prev) return null;
+        const settlements = prev.settlements ? [...prev.settlements] : [];
+        settlements.push(settlementData);
+        return {
+          ...prev,
+          settlements
+        };
+      });
+
+    } catch (error) {
+      console.error("USDC Payment error:", error);
+      setErrorMessage(error.message || "USDC payment failed. Please try again.");
+      setPaymentStatus("error");
+    }
+  };
+
+  const handlePayment = () => {
+    if (paymentMethod === "eth") {
+      handleEthPayment();
+    } else {
+      processUsdcPayment();
     }
   };
 
@@ -339,9 +423,23 @@ export default function ExpenseDetails() {
             <div className="mt-6 p-4 bg-muted rounded-lg">
               <h3 className="text-lg font-medium mb-2">You owe</h3>
               <p className="text-2xl font-bold mb-1">{formatCurrency(userDebt.amount, expense.currency || "USD")}</p>
-              <p className="text-sm text-muted-foreground mb-4">
-                Payment will be made in ETH ({convertToETH(userDebt.amount, expense.currency || "USD").toFixed(6)} ETH)
-              </p>
+              
+              <Tabs defaultValue="eth" onValueChange={(value) => setPaymentMethod(value as "eth" | "usdc")}>
+                <TabsList className="grid w-full grid-cols-2 mb-4">
+                  <TabsTrigger value="eth" className="data-[state=active]:bg-primary data-[state=active]:text-white">Pay with ETH</TabsTrigger>
+                  <TabsTrigger value="usdc" className="data-[state=active]:bg-primary data-[state=active]:text-white">Pay with USDC</TabsTrigger>
+                </TabsList>
+                <TabsContent value="eth">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Payment will be made in ETH ({convertToETH(userDebt.amount, expense.currency || "USD").toFixed(6)} ETH)
+                  </p>
+                </TabsContent>
+                <TabsContent value="usdc">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Payment will be made in USDC ({convertToUSDC(userDebt.amount, expense.currency || "USD").toFixed(2)} USDC)
+                  </p>
+                </TabsContent>
+              </Tabs>
 
               {paymentStatus === "success" ? (
                 <Alert className="bg-green-50 border-green-200">
@@ -375,7 +473,7 @@ export default function ExpenseDetails() {
                   disabled={paymentStatus === "loading"}
                   className="w-full mt-2"
                 >
-                  {paymentStatus === "loading" ? "Processing..." : "Pay Now"}
+                  {paymentStatus === "loading" ? "Processing..." : `Pay with ${paymentMethod.toUpperCase()}`}
                 </Button>
               )}
             </div>

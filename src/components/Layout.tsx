@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useApp } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
@@ -15,11 +14,31 @@ import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import ConnectWallet from "@/components/ConnectWallet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { EthBalance } from "@coinbase/onchainkit/identity";
+import { useAccount, useDisconnect } from "wagmi";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, disconnectUser } = useApp();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const navigate = useNavigate();
+  const { isConnected } = useAccount();
+  const { disconnect } = useDisconnect();
+
+  // Force re-render when connection state changes
+  useEffect(() => {
+    // This effect will run whenever isConnected changes
+    // helping ensure the UI updates appropriately
+  }, [isConnected]);
+
+  // Handle disconnect button click
+  const handleDisconnect = () => {
+    // First disconnect from wallet provider
+    disconnect();
+    // Then update app state
+    disconnectUser();
+    // Navigate to home page
+    navigate("/", { replace: true });
+  };
 
   const NavItem = ({
     to,
@@ -84,6 +103,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   </Avatar>
                   <div className="flex flex-col">
                     <span className="text-sm font-medium">{user.displayName}</span>
+                    <span className="text-xs text-muted-foreground">
+                    </span>
                   </div>
                 </div>
               )}
@@ -91,7 +112,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 variant="ghost"
                 size="icon"
                 className="ml-auto"
-                onClick={() => disconnectUser()}
+                onClick={handleDisconnect}
               >
                 <LogOut className="h-4 w-4" />
               </Button>
