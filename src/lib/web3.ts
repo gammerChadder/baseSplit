@@ -1,12 +1,12 @@
 import { ethers } from "ethers";
 import { displayToast } from "./utils";
 
-export const SEPOLIA_CHAIN_ID = '0x14a34'; // Hex value for base Sepolia testnet (84532 in decimal)
-export const SEPOLIA_RPC_URL = 'https://84532.rpc.thirdweb.com';
-export const BLOCK_EXPLORER_URL = 'https://base-sepolia.blockscout.com';
+export const SEPOLIA_CHAIN_ID = '0x2105'; // Hex value for base Sepolia testnet (84532 in decimal)
+export const SEPOLIA_RPC_URL = 'https://mainnet.base.org';
+export const BLOCK_EXPLORER_URL = 'https://basescan.org';
 
 // USDC contract address on Base Sepolia testnet
-export const USDC_CONTRACT_ADDRESS = '0x036CbD53842c5426634e7929541eC2318f3dCF7e'; // Example address, replace with actual testnet USDC address
+export const USDC_CONTRACT_ADDRESS = '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913'; // Example address, replace with actual testnet USDC address
 export const USDC_CONTRACT_ABI = [
   // ERC20 Standard functions
   "function name() view returns (string)",
