@@ -449,7 +449,7 @@ export default function ExpenseDetails() {
                     Your payment has been processed successfully.
                     {txHash && (
                       <a 
-                        href={`https://sepolia.basescan.org/tx/${txHash}`}
+                        href={`https://basescan.org/tx/${txHash}`}
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="flex items-center mt-2 text-blue-600 hover:underline"
@@ -488,7 +488,7 @@ export default function ExpenseDetails() {
                   You've already paid this expense.
                   {txHash && (
                     <a 
-                      href={`https://sepolia.basescan.org/tx/${txHash}`} 
+                      href={`https://basescan.org/tx/${txHash}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="flex items-center mt-2 text-blue-600 hover:underline"
