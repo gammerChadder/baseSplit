@@ -60,9 +60,9 @@ Combined with AI insights and decentralization, BaseSplit empowers users to take
 - **Frontend**: React.js + TailwindCSS  
 - **Backend**: Node.js / Express with API integrations  
 - **Blockchain Layer**: Base Chain (L2), integrated via ethers.js  
-- **Database**: Firebase / Supabase (for metadata and off-chain expense tracking)  
-- **AI Analysis**: OpenAI API for categorization, trend detection, and reporting  
-- **Payment Layer**: USDC stablecoin integration via Base-compatible wallets (e.g., MetaMask)
+- **Database**: Firebase  (for metadata and off-chain expense tracking)  
+- **AI Analysis**: Gemini API for categorization, trend detection, and reporting  
+- **Payment Layer**: USDC stablecoin integration via Base-compatible wallets (e.g., Coinbase wallet)
 
 ### 🧱 Core Components
 
