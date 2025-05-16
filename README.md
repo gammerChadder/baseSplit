@@ -1,73 +1,81 @@
-# Welcome to your Lovable project
+# BaseSplit — Smart, Transparent Expense Sharing on Base
 
-## Project info
+BaseSplit is a decentralized, AI-powered expense tracking and splitting platform built on the Base Chain. It helps groups of people split bills, settle expenses in stablecoins like USDC, and gain intelligent insights into their financial behavior — all with low fees and high transparency.
 
-**URL**: https://lovable.dev/projects/4cea378a-98ea-4fb8-9679-0ad330cede8d
+---
 
-## How can I edit this code?
+## 🧩 Problem
 
-There are several ways of editing your application.
+Splitting expenses is a common necessity among friends, roommates, travel companions, and families. However, most existing solutions are:
 
-**Use Lovable**
+- Centralized and non-transparent  
+- Expensive to use due to high transaction fees (especially on L1 chains)  
+- Lacking in smart features for budgeting, categorization, or insights  
+- Not built for stable, scalable, or trustless environments  
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/4cea378a-98ea-4fb8-9679-0ad330cede8d) and start prompting.
+This leaves users with limited control over their data, high costs, and no clear picture of how they spend.
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+## 💡 Solution — BaseSplit
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+BaseSplit solves these issues with a modern, decentralized approach:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- Built on **Base Chain** for low gas fees and high throughput  
+- Uses **USDC stablecoin** for seamless and stable payments  
+- Offers **AI-powered financial insights**: categorized spending breakdowns, budget reports, and trends  
+- Ensures **decentralization and transparency** — users always have full control  
+- Built-in support for **group-based expense splitting**, tracking, and real-time settlement  
 
-Follow these steps:
+With BaseSplit, expense sharing becomes smoother, smarter, and fairer.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+---
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 🔍 Proof of Work
 
-# Step 3: Install the necessary dependencies.
-npm i
+- ✅ Working prototype deployed with stablecoin transaction support  
+- ✅ 20–30 early users (friends & family) have tested and successfully used BaseSplit  
+- ✅ Successfully split, tracked, and recorded shared transactions during testing  
+- ✅ Positive feedback on transparency, ease of use, and smart reporting features  
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+---
 
-**Edit a file directly in GitHub**
+## 🎯 How is it Useful?
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+BaseSplit is particularly helpful for:
 
-**Use GitHub Codespaces**
+- **Roommates**: Split rent, groceries, and utility bills  
+- **Travel groups**: Keep track of who paid for what and settle instantly  
+- **Couples or families**: Budget and manage shared finances more clearly  
+- **Communities or DAOs**: Record and verify shared group expenses transparently  
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Combined with AI insights and decentralization, BaseSplit empowers users to take full control of shared spending.
 
-## What technologies are used for this project?
+---
 
-This project is built with:
+## 🏗️ Architecture Overview
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### ⚙️ Tech Stack
 
-## How can I deploy this project?
+- **Frontend**: React.js + TailwindCSS  
+- **Backend**: Node.js / Express with API integrations  
+- **Blockchain Layer**: Base Chain (L2), integrated via ethers.js  
+- **Database**: Firebase / Supabase (for metadata and off-chain expense tracking)  
+- **AI Analysis**: OpenAI API for categorization, trend detection, and reporting  
+- **Payment Layer**: USDC stablecoin integration via Base-compatible wallets (e.g., MetaMask)
 
-Simply open [Lovable](https://lovable.dev/projects/4cea378a-98ea-4fb8-9679-0ad330cede8d) and click on Share -> Publish.
+### 🧱 Core Components
 
-## Can I connect a custom domain to my Lovable project?
+- **Expense Tracker UI**: Add, split, and view transactions  
+- **Wallet Connector**: Connects Base-compatible wallet for signing and payments  
+- **Smart Settlement Engine**: Uses USDC for fast, cheap, and stable payments  
+- **AI Budget Analyzer**: Categorizes expenses, generates smart reports  
+- **Group Management Module**: Add users, assign shares, view group activity  
 
-Yes, you can!
+---
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+🔗 **Note:** Smart contracts and on-chain logic are not included in this repo, as this README focuses on product and architecture-level information.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+---
+
+Made with 💙 on Base.
